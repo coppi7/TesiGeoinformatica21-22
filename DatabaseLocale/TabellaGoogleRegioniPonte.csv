@@ -1,0 +1,21 @@
+country_region_code,country_region,sub_region_1,sub_region_2,metro_area,iso_3166_2_code,census_fips_code,place_id,date,retail_and_recreation_percent_change_from_baseline,grocery_and_pharmacy_percent_change_from_baseline,parks_percent_change_from_baseline,transit_stations_percent_change_from_baseline,workplaces_percent_change_from_baseline,residential_percent_change_from_baseline,COD_RIP,COD_REG,DEN_REG
+IT,Italy,Piedmont,<undefined>,<undefined>,IT-21,<undefined>,ChIJZ7GdATt0h0cR_zsS8u24x7w,2020-02-15,1,0,23,4,0,-1,1,1,Piemonte
+IT,Italy,Aosta,<undefined>,<undefined>,IT-23,<undefined>,ChIJp_WvxdbeiEcRm9WceXyYJVY,2020-02-15,8,5,27,12,2,-1,1,2,Valle d'Aosta
+IT,Italy,Lombardy,<undefined>,<undefined>,IT-25,<undefined>,ChIJf4M-GsNEgUcR1JMVKCIm8qY,2020-02-15,2,-1,50,8,-2,-1,1,3,Lombardia
+IT,Italy,Trentino-South Tyrol,<undefined>,<undefined>,IT-32,<undefined>,ChIJ5bTpZ5F5eEcRYHyQFYcJBwE,2020-02-15,4,2,22,12,0,-1,2,4,Trentino-Alto Adige
+IT,Italy,Veneto,<undefined>,<undefined>,IT-34,<undefined>,ChIJd7cEzPHXeEcRcHyQFYcJBwE,2020-02-15,6,1,54,18,1,-2,2,5,Veneto
+IT,Italy,Friuli-Venezia Giulia,<undefined>,<undefined>,IT-36,<undefined>,ChIJ67q-XqQzekcRgHyQFYcJBwE,2020-02-15,3,1,45,10,1,-1,2,6,Friuli Venezia Giulia
+IT,Italy,Liguria,<undefined>,<undefined>,IT-42,<undefined>,ChIJtU8s2GUS0xIRkHw8R33mBQE,2020-02-15,3,2,41,8,1,-1,1,7,Liguria
+IT,Italy,Emilia-Romagna,<undefined>,<undefined>,IT-45,<undefined>,ChIJ3YXzRny1KhMRoHy6_AubBwE,2020-02-15,5,4,25,7,1,-2,2,8,Emilia-Romagna
+IT,Italy,Tuscany,<undefined>,<undefined>,IT-52,<undefined>,ChIJezSAEFMr1BIRq1kgW7rDxro,2020-02-15,5,0,75,13,1,-2,3,9,Toscana
+IT,Italy,Umbria,<undefined>,<undefined>,IT-55,<undefined>,ChIJff2Ab86ZLhMRgmK_suBHCJw,2020-02-15,3,-1,55,14,-2,-2,3,10,Umbria
+IT,Italy,Marche,<undefined>,<undefined>,IT-57,<undefined>,ChIJPX4ilLt_LRMR0WA6TId0Fks,2020-02-15,4,-1,32,9,1,-1,3,11,Marche
+IT,Italy,Lazio,<undefined>,<undefined>,IT-62,<undefined>,ChIJNWU6NebuJBMRKYWj8WSQSm8,2020-02-15,4,-1,43,9,1,-2,3,12,Lazio
+IT,Italy,Abruzzo,<undefined>,<undefined>,IT-65,<undefined>,ChIJI6qUuHc1MBMR8Hw4sppPCQE,2020-02-15,2,2,36,9,0,-1,4,13,Abruzzo
+IT,Italy,Molise,<undefined>,<undefined>,IT-67,<undefined>,ChIJU9hGRqSQMBMRn54iK3OMYRw,2020-02-15,2,1,25,4,2,-1,4,14,Molise
+IT,Italy,Campania,<undefined>,<undefined>,IT-72,<undefined>,ChIJ35Zq01gTOxMRzUO1VBRFAs0,2020-02-15,2,-1,23,10,0,-2,4,15,Campania
+IT,Italy,Apulia,<undefined>,<undefined>,IT-75,<undefined>,ChIJ3ZO5jSvkNhMRj3wk-HC6bzk,2020-02-15,-1,1,4,2,-1,0,4,16,Puglia
+IT,Italy,Basilicata,<undefined>,<undefined>,IT-77,<undefined>,ChIJgyyNBTHqOBMRjbbjVk3MQQI,2020-02-15,-1,-1,12,0,-1,0,4,17,Basilicata
+IT,Italy,Calabria,<undefined>,<undefined>,IT-78,<undefined>,ChIJCxVihNKQPxMRcSMmPSQdpJE,2020-02-15,-2,-2,12,3,1,0,4,18,Calabria
+IT,Italy,Sicily,<undefined>,<undefined>,IT-82,<undefined>,ChIJs1lT0GhiEBMRUH22ZykECwE,2020-02-15,0,-2,20,1,-2,0,5,19,Sicilia
+IT,Italy,Sardinia,<undefined>,<undefined>,IT-88,<undefined>,ChIJHeK-0hzF3RIRYH0OyxW-CAE,2020-02-15,-2,-1,23,4,0,0,5,20,Sardegna
