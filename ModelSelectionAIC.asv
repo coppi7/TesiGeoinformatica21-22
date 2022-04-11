@@ -83,164 +83,6 @@ x0=0; x0_lo=-100; x0_hi=100;
 c=a+(b-d)*x0; c_lo=-100; c_hi=100; 
 niter=57;
 np=683;
-%% Google Transit Stations vs Google Residential
-f62=figure("Name","GoogleTransitStations vs GoogleResidential");
-% `true' parameters
-a=0;
-b=1;
-d=1;
-x0=0;
-c=a+(b-d)*x0;
-
-data = [ArrayA(:,4) ArrayA(:,6)];
-% fit a linear model
-fun=@(pars)eval_linear(pars,data);
-p0=[a b];
-lb=[a_lo b_lo];
-ub=[a_hi b_hi];
-problem=createOptimProblem('fmincon','objective',fun,'x0',p0,'lb',lb,'ub',ub);
-ms=MultiStart;
-[pars_linear,RSS_linear]=run(ms,problem,niter);
-AIC_linear=2*(numel(pars_linear)+1)+np*log(RSS_linear);
-
-figure(f62)
-subplot(231)
-scatter(ArrayA(:,4),ArrayA(:,6),'filled')
-hold on
-colormap=lines(2); 
-col=colormap(2,:);
-plot([min(ArrayA(:,4)) max(ArrayA(:,4))],linear(pars_linear,[min(ArrayA(:,4)) max(ArrayA(:,4))]),'Color',col,'LineWidth',2)
-set(gca,'FontSize',20);
-% fit a piece-wise linear model with fixed splitting point
-fun=@(pars)eval_piecewise_fsp(pars,data,x0);
-p0=[a b d];
-lb=[a_lo b_lo d_lo];
-ub=[a_hi b_hi d_hi];
-problem=createOptimProblem('fmincon','objective',fun,'x0',p0,'lb',lb,'ub',ub);
-ms=MultiStart;
-[pars_piecewise_fsp,RSS_piecewise_fsp]=run(ms,problem,niter);
-AIC_piecewise_fsp=2*(numel(pars_piecewise_fsp)+1)+np*log(RSS_piecewise_fsp);
-
-figure(f62)
-subplot(232)
-scatter(ArrayA(:,4),ArrayA(:,6),'filled')
-hold on
-plot([min(ArrayA(:,4)) x0 max(ArrayA(:,4))],piecewise_fsp(pars_piecewise_fsp,[min(ArrayA(:,4)) x0 max(ArrayA(:,4))],x0),'Color',col,'LineWidth',2)
-set(gca,'FontSize',20);
-% fit a piece-wise linear model
-fun=@(pars)eval_piecewise(pars,data);
-p0=[a b d x0];
-lb=[a_lo b_lo d_lo x0_lo];
-ub=[a_hi b_hi d_hi x0_hi];
-problem=createOptimProblem('fmincon','objective',fun,'x0',p0,'lb',lb,'ub',ub);
-ms=MultiStart;
-[pars_piecewise,RSS_piecewise]=run(ms,problem,niter);
-AIC_piecewise=2*(numel(pars_piecewise)+1)+np*log(RSS_piecewise);
-
-figure(f62)
-subplot(233)
-scatter(ArrayA(:,4),ArrayA(:,6),'filled')
-hold on
-plot([min(ArrayA(:,4)) pars_piecewise(4) max(ArrayA(:,4))],piecewise(pars_piecewise,[min(ArrayA(:,4)) pars_piecewise(4) max(ArrayA(:,4))]),'Color',col,'LineWidth',2)
-set(gca,'FontSize',20);
-% fit two disjoint linear models with fixed splitting point
-fun=@(pars)eval_disjoint_fsp(pars,data,x0);
-p0=[a b c d];
-lb=[a_lo b_lo c_lo d_lo];
-ub=[a_hi b_hi c_hi d_hi];
-problem=createOptimProblem('fmincon','objective',fun,'x0',p0,'lb',lb,'ub',ub);
-ms=MultiStart;
-[pars_disjoint_fsp,RSS_disjoint_fsp]=run(ms,problem,niter);
-AIC_disjoint_fsp=2*(numel(pars_disjoint_fsp)+1)+np*log(RSS_disjoint_fsp);
-
-figure(f62)
-subplot(234)
-scatter(ArrayA(:,4),ArrayA(:,6),'filled')
-hold on
-plot([min(ArrayA(:,4)) x0],disjoint_fsp(pars_disjoint_fsp,[min(ArrayA(:,4)) x0],x0),'Color',col,'LineWidth',2)
-xs=sort(ArrayA(:,4));
-x1=xs(find(xs>x0,1,'first'));
-plot([x1 max(ArrayA(:,4))],disjoint_fsp(pars_disjoint_fsp,[x1 max(ArrayA(:,4))],x0),'Color',col,'LineWidth',2)
-set(gca,'FontSize',20);
-% fit two disjoint linear models
-fun=@(pars)eval_disjoint(pars,data);
-p0=[a b c d x0];
-lb=[a_lo b_lo c_lo d_lo x0_lo];
-ub=[a_hi b_hi c_hi d_hi x0_hi];
-problem=createOptimProblem('fmincon','objective',fun,'x0',p0,'lb',lb,'ub',ub);
-ms=MultiStart;
-[pars_disjoint,RSS_disjoint]=run(ms,problem,niter);
-AIC_disjoint=2*(numel(pars_disjoint)+1)+np*log(RSS_disjoint);
-
-figure(f62)
-subplot(235)
-scatter(ArrayA(:,4),ArrayA(:,6),'filled')
-hold on
-plot([min(ArrayA(:,4)) pars_disjoint(5)],disjoint(pars_disjoint,[min(ArrayA(:,4)) pars_disjoint(5)]),'Color',col,'LineWidth',2)
-x1=xs(find(xs>pars_disjoint(5),1,'first'));
-plot([x1 max(ArrayA(:,4))],disjoint(pars_disjoint,[x1 max(ArrayA(:,4))]),'Color',col,'LineWidth',2)
-set(gca,'FontSize',20);
-% evaluate Delta_AIC scores
-AIC=[AIC_linear AIC_piecewise_fsp AIC_piecewise AIC_disjoint_fsp AIC_disjoint];
-Delta_AIC=AIC-min(AIC);
-
-figure(f62)
-subplot(236)
-bar(log2(Delta_AIC))
-dmin=floor(min(log2(Delta_AIC(Delta_AIC>0))));
-dmax=ceil(max(log2(Delta_AIC)));
-set(gca,'XTickLabels',{'linear','piecewise-fsp','piecewise','disjoint-fsp','disjoint'})
-set(gca,'YLim',[dmin dmax],'YTick',dmin:dmax,'YTickLabels',2.^(dmin:dmax))
-set(gca,'FontSize',20);
-ylabel('\DeltaAIC')
-grid on
-box off
-
-if Delta_AIC(1)==0
-    TabellaConfrontiAIC.model(35) =  "linear";
-    TabellaConfrontiAIC.a(35) =  pars_linear(1);
-    TabellaConfrontiAIC.b(35) =  pars_linear(2);
-    TabellaConfrontiAIC.c(35) =  nan;
-    TabellaConfrontiAIC.d(35) =  nan;
-    TabellaConfrontiAIC.x0(35) =  nan;
-elseif Delta_AIC(2)==0
-    TabellaConfrontiAIC.model(35) =  "piecewise_fsp";
-    TabellaConfrontiAIC.a(35) =  pars_piecewise_fsp(1);
-    TabellaConfrontiAIC.b(35) =  pars_piecewise_fsp(2);
-    TabellaConfrontiAIC.d(35) =  pars_piecewise_fsp(3);
-    TabellaConfrontiAIC.x0(35) =  0;
-    TabellaConfrontiAIC.c(35) =  TabellaConfrontiAIC.a(8)+(TabellaConfrontiAIC.b(8)-TabellaConfrontiAIC.d(8))*TabellaConfrontiAIC.x0(8);
-elseif Delta_AIC(3)==0
-    TabellaConfrontiAIC.model(35) =  "piecewise";
-    TabellaConfrontiAIC.a(35) =  pars_piecewise(1);
-    TabellaConfrontiAIC.b(35) =  pars_piecewise(2);
-    TabellaConfrontiAIC.d(35) =  pars_piecewise(3);
-    TabellaConfrontiAIC.x0(35) =  pars_piecewise(4);
-    TabellaConfrontiAIC.c(35) =  TabellaConfrontiAIC.a(8)+(TabellaConfrontiAIC.b(8)-TabellaConfrontiAIC.d(8))*TabellaConfrontiAIC.x0(8);
-elseif Delta_AIC(4)==0
-    TabellaConfrontiAIC.model(35) =  "disjoint_fsp";
-    TabellaConfrontiAIC.a(35) =  pars_disjoint(1);
-    TabellaConfrontiAIC.b(35) =  pars_disjoint(2);
-    TabellaConfrontiAIC.c(35) =  pars_disjoint(3);
-    TabellaConfrontiAIC.d(35) =  pars_disjoint(4);
-    TabellaConfrontiAIC.x0(35) =  0;
-elseif Delta_AIC(5)==0
-    TabellaConfrontiAIC.model(35) =  "disjoint";
-    TabellaConfrontiAIC.a(35) =  pars_disjoint(1);
-    TabellaConfrontiAIC.b(35) =  pars_disjoint(2);
-    TabellaConfrontiAIC.c(35) =  pars_disjoint(3);
-    TabellaConfrontiAIC.d(35) =  pars_disjoint(4);
-    TabellaConfrontiAIC.x0(35) = pars_disjoint(5);
-end
-if Delta_AIC(1)<=2
-    TabellaConfrontiAIC.approximation(35) = "(linear)";
-elseif Delta_AIC(2)<=2
-    TabellaConfrontiAIC.approximation(35) = "(piecewise_fsp)";
-elseif Delta_AIC(3)<=2
-    TabellaConfrontiAIC.approximation(35) = "(piecewise)";
-elseif Delta_AIC(4)<=2
-    TabellaConfrontiAIC.approximation(35) = "(disjoint_fsp)";
-end
 %% Apple Walking vs Apple Driving
 f21=figure("Name","AppleWalking vs AppleDriving");
 % `true' parameters
@@ -378,13 +220,13 @@ elseif Delta_AIC(5)==0
     TabellaConfrontiAIC.x0(1) = pars_disjoint(5);
 end
 
-if Delta_AIC(1)<=2
+if Delta_AIC(1)<2.5
     TabellaConfrontiAIC.approximation(1) = "(linear)";
-elseif Delta_AIC(2)<=2
+elseif Delta_AIC(2)<2.5
     TabellaConfrontiAIC.approximation(1) = "(piecewise_fsp)";
-elseif Delta_AIC(3)<=2
+elseif Delta_AIC(3)<2.5
     TabellaConfrontiAIC.approximation(1) = "(piecewise)";
-elseif Delta_AIC(4)<=2
+elseif Delta_AIC(4)<2.5
     TabellaConfrontiAIC.approximation(1) = "(disjoint_fsp)";
 end
 
@@ -535,13 +377,13 @@ elseif Delta_AIC(5)==0
     TabellaConfrontiAIC.x0(2) = pars_disjoint(5);
 end
 
-if Delta_AIC(1)<=2
+if Delta_AIC(1)<2.5
     TabellaConfrontiAIC.approximation(2) = "(linear)";
-elseif Delta_AIC(2)<=2
+elseif Delta_AIC(2)<2.5
     TabellaConfrontiAIC.approximation(2) = "(piecewise_fsp)";
-elseif Delta_AIC(3)<=2
+elseif Delta_AIC(3)<2.5
     TabellaConfrontiAIC.approximation(2) = "(piecewise)";
-elseif Delta_AIC(4)<=2
+elseif Delta_AIC(4)<2.5
     TabellaConfrontiAIC.approximation(2) = "(disjoint_fsp)";
 end
 
@@ -692,13 +534,13 @@ elseif Delta_AIC(5)==0
     TabellaConfrontiAIC.x0(3) = pars_disjoint(5);
 end
 
-if Delta_AIC(1)<=2
+if Delta_AIC(1)<2.5
     TabellaConfrontiAIC.approximation(3) = "(linear)";
-elseif Delta_AIC(2)<=2
+elseif Delta_AIC(2)<2.5
     TabellaConfrontiAIC.approximation(3) = "(piecewise_fsp)";
-elseif Delta_AIC(3)<=2
+elseif Delta_AIC(3)<2.5
     TabellaConfrontiAIC.approximation(3) = "(piecewise)";
-elseif Delta_AIC(4)<=2
+elseif Delta_AIC(4)<2.5
     TabellaConfrontiAIC.approximation(3) = "(disjoint_fsp)";
 end
 
@@ -849,13 +691,13 @@ elseif Delta_AIC(5)==0
     TabellaConfrontiAIC.x0(4) = pars_disjoint(5);
 end
 
-if Delta_AIC(1)<=2
+if Delta_AIC(1)<2.5
     TabellaConfrontiAIC.approximation(4) = "(linear)";
-elseif Delta_AIC(2)<=2
+elseif Delta_AIC(2)<2.5
     TabellaConfrontiAIC.approximation(4) = "(piecewise_fsp)";
-elseif Delta_AIC(3)<=2
+elseif Delta_AIC(3)<2.5
     TabellaConfrontiAIC.approximation(4) = "(piecewise)";
-elseif Delta_AIC(4)<=2
+elseif Delta_AIC(4)<2.5
     TabellaConfrontiAIC.approximation(4) = "(disjoint_fsp)";
 end
 
@@ -1006,13 +848,13 @@ elseif Delta_AIC(5)==0
     TabellaConfrontiAIC.x0(5) = pars_disjoint(5);
 end
 
-if Delta_AIC(1)<=2
+if Delta_AIC(1)<2.5
     TabellaConfrontiAIC.approximation(5) = "(linear)";
-elseif Delta_AIC(2)<=2
+elseif Delta_AIC(2)<2.5
     TabellaConfrontiAIC.approximation(5) = "(piecewise_fsp)";
-elseif Delta_AIC(3)<=2
+elseif Delta_AIC(3)<2.5
     TabellaConfrontiAIC.approximation(5) = "(piecewise)";
-elseif Delta_AIC(4)<=2
+elseif Delta_AIC(4)<2.5
     TabellaConfrontiAIC.approximation(5) = "(disjoint_fsp)";
 end
 
@@ -1163,13 +1005,13 @@ elseif Delta_AIC(5)==0
     TabellaConfrontiAIC.x0(6) = pars_disjoint(5);
 end
 
-if Delta_AIC(1)<=2
+if Delta_AIC(1)<2.5
     TabellaConfrontiAIC.approximation(6) = "(linear)";
-elseif Delta_AIC(2)<=2
+elseif Delta_AIC(2)<2.5
     TabellaConfrontiAIC.approximation(6) = "(piecewise_fsp)";
-elseif Delta_AIC(3)<=2
+elseif Delta_AIC(3)<2.5
     TabellaConfrontiAIC.approximation(6) = "(piecewise)";
-elseif Delta_AIC(4)<=2
+elseif Delta_AIC(4)<2.5
     TabellaConfrontiAIC.approximation(6) = "(disjoint_fsp)";
 end
 
@@ -1320,13 +1162,13 @@ elseif Delta_AIC(5)==0
     TabellaConfrontiAIC.x0(7) = pars_disjoint(5);
 end
 
-if Delta_AIC(1)<=2
+if Delta_AIC(1)<2.5
     TabellaConfrontiAIC.approximation(7) = "(linear)";
-elseif Delta_AIC(2)<=2
+elseif Delta_AIC(2)<2.5
     TabellaConfrontiAIC.approximation(7) = "(piecewise_fsp)";
-elseif Delta_AIC(3)<=2
+elseif Delta_AIC(3)<2.5
     TabellaConfrontiAIC.approximation(7) = "(piecewise)";
-elseif Delta_AIC(4)<=2
+elseif Delta_AIC(4)<2.5
     TabellaConfrontiAIC.approximation(7) = "(disjoint_fsp)";
 end
 
@@ -1477,13 +1319,13 @@ elseif Delta_AIC(5)==0
     TabellaConfrontiAIC.x0(8) = pars_disjoint(5);
 end
 
-if Delta_AIC(1)<=2
+if Delta_AIC(1)<2.5
     TabellaConfrontiAIC.approximation(8) = "(linear)";
-elseif Delta_AIC(2)<=2
+elseif Delta_AIC(2)<2.5
     TabellaConfrontiAIC.approximation(8) = "(piecewise_fsp)";
-elseif Delta_AIC(3)<=2
+elseif Delta_AIC(3)<2.5
     TabellaConfrontiAIC.approximation(8) = "(piecewise)";
-elseif Delta_AIC(4)<=2
+elseif Delta_AIC(4)<2.5
     TabellaConfrontiAIC.approximation(8) = "(disjoint_fsp)";
 end
 
@@ -1634,13 +1476,13 @@ elseif Delta_AIC(5)==0
     TabellaConfrontiAIC.x0(9) = pars_disjoint(5);
 end
 
-if Delta_AIC(1)<=2
+if Delta_AIC(1)<2.5
     TabellaConfrontiAIC.approximation(9) = "(linear)";
-elseif Delta_AIC(2)<=2
+elseif Delta_AIC(2)<2.5
     TabellaConfrontiAIC.approximation(9) = "(piecewise_fsp)";
-elseif Delta_AIC(3)<=2
+elseif Delta_AIC(3)<2.5
     TabellaConfrontiAIC.approximation(9) = "(piecewise)";
-elseif Delta_AIC(4)<=2
+elseif Delta_AIC(4)<2.5
     TabellaConfrontiAIC.approximation(9) = "(disjoint_fsp)";
 end
 
@@ -1794,13 +1636,13 @@ elseif Delta_AIC(5)==0
     TabellaConfrontiAIC.x0(10) = pars_disjoint(5);
 end
 
-if Delta_AIC(1)<=2
+if Delta_AIC(1)<2.5
     TabellaConfrontiAIC.approximation(10) = "(linear)";
-elseif Delta_AIC(2)<=2
+elseif Delta_AIC(2)<2.5
     TabellaConfrontiAIC.approximation(10) = "(piecewise_fsp)";
-elseif Delta_AIC(3)<=2
+elseif Delta_AIC(3)<2.5
     TabellaConfrontiAIC.approximation(10) = "(piecewise)";
-elseif Delta_AIC(4)<=2
+elseif Delta_AIC(4)<2.5
     TabellaConfrontiAIC.approximation(10) = "(disjoint_fsp)";
 end
 
@@ -1954,13 +1796,13 @@ elseif Delta_AIC(5)==0
     TabellaConfrontiAIC.x0(11) = pars_disjoint(5);
 end
 
-if Delta_AIC(1)<=2
+if Delta_AIC(1)<2.5
     TabellaConfrontiAIC.approximation(11) = "(linear)";
-elseif Delta_AIC(2)<=2
+elseif Delta_AIC(2)<2.5
     TabellaConfrontiAIC.approximation(11) = "(piecewise_fsp)";
-elseif Delta_AIC(3)<=2
+elseif Delta_AIC(3)<2.5
     TabellaConfrontiAIC.approximation(11) = "(piecewise)";
-elseif Delta_AIC(4)<=2
+elseif Delta_AIC(4)<2.5
     TabellaConfrontiAIC.approximation(11) = "(disjoint_fsp)";
 end
 
@@ -2114,13 +1956,13 @@ elseif Delta_AIC(5)==0
     TabellaConfrontiAIC.x0(12) = pars_disjoint(5);
 end
 
-if Delta_AIC(1)<=2
+if Delta_AIC(1)<2.5
     TabellaConfrontiAIC.approximation(12) = "(linear)";
-elseif Delta_AIC(2)<=2
+elseif Delta_AIC(2)<2.5
     TabellaConfrontiAIC.approximation(12) = "(piecewise_fsp)";
-elseif Delta_AIC(3)<=2
+elseif Delta_AIC(3)<2.5
     TabellaConfrontiAIC.approximation(12) = "(piecewise)";
-elseif Delta_AIC(4)<=2
+elseif Delta_AIC(4)<2.5
     TabellaConfrontiAIC.approximation(12) = "(disjoint_fsp)";
 end
 
@@ -2274,23 +2116,23 @@ elseif Delta_AIC(5)==0
     TabellaConfrontiAIC.x0(13) = pars_disjoint(5);
 end
 
-if Delta_AIC(1)<=2
+if Delta_AIC(1)<2.5
     TabellaConfrontiAIC.approximation(13) = "(linear)";
-elseif Delta_AIC(2)<=2
+elseif Delta_AIC(2)<2.5
     TabellaConfrontiAIC.approximation(13) = "(piecewise_fsp)";
-elseif Delta_AIC(3)<=2
+elseif Delta_AIC(3)<2.5
     TabellaConfrontiAIC.approximation(13) = "(piecewise)";
-elseif Delta_AIC(4)<=2
+elseif Delta_AIC(4)<2.5
     TabellaConfrontiAIC.approximation(13) = "(disjoint_fsp)";
 end
 
-if Delta_AIC(1)<=2
+if Delta_AIC(1)<2.5
     TabellaConfrontiAIC.approximation(13) = "(linear)";
-elseif Delta_AIC(2)<=2
+elseif Delta_AIC(2)<2.5
     TabellaConfrontiAIC.approximation(13) = "(piecewise_fsp)";
-elseif Delta_AIC(3)<=2
+elseif Delta_AIC(3)<2.5
     TabellaConfrontiAIC.approximation(13) = "(piecewise)";
-elseif Delta_AIC(4)<=2
+elseif Delta_AIC(4)<2.5
     TabellaConfrontiAIC.approximation(13) = "(disjoint_fsp)";
 end
 
@@ -2444,13 +2286,13 @@ elseif Delta_AIC(5)==0
     TabellaConfrontiAIC.x0(14) = pars_disjoint(5);
 end
 
-if Delta_AIC(1)<=2
+if Delta_AIC(1)<2.5
     TabellaConfrontiAIC.approximation(14) = "(linear)";
-elseif Delta_AIC(2)<=2
+elseif Delta_AIC(2)<2.5
     TabellaConfrontiAIC.approximation(14) = "(piecewise_fsp)";
-elseif Delta_AIC(3)<=2
+elseif Delta_AIC(3)<2.5
     TabellaConfrontiAIC.approximation(14) = "(piecewise)";
-elseif Delta_AIC(4)<=2
+elseif Delta_AIC(4)<2.5
     TabellaConfrontiAIC.approximation(14) = "(disjoint_fsp)";
 end
 
@@ -2604,13 +2446,13 @@ elseif Delta_AIC(5)==0
     TabellaConfrontiAIC.x0(15) = pars_disjoint(5);
 end
 
-if Delta_AIC(1)<=2
+if Delta_AIC(1)<2.5
     TabellaConfrontiAIC.approximation(15) = "(linear)";
-elseif Delta_AIC(2)<=2
+elseif Delta_AIC(2)<2.5
     TabellaConfrontiAIC.approximation(15) = "(piecewise_fsp)";
-elseif Delta_AIC(3)<=2
+elseif Delta_AIC(3)<2.5
     TabellaConfrontiAIC.approximation(15) = "(piecewise)";
-elseif Delta_AIC(4)<=2
+elseif Delta_AIC(4)<2.5
     TabellaConfrontiAIC.approximation(15) = "(disjoint_fsp)";
 end
 
@@ -2761,13 +2603,13 @@ elseif Delta_AIC(5)==0
     TabellaConfrontiAIC.x0(16) = pars_disjoint(5);
 end
 
-if Delta_AIC(1)<=2
+if Delta_AIC(1)<2.5
     TabellaConfrontiAIC.approximation(16) = "(linear)";
-elseif Delta_AIC(2)<=2
+elseif Delta_AIC(2)<2.5
     TabellaConfrontiAIC.approximation(16) = "(piecewise_fsp)";
-elseif Delta_AIC(3)<=2
+elseif Delta_AIC(3)<2.5
     TabellaConfrontiAIC.approximation(16) = "(piecewise)";
-elseif Delta_AIC(4)<=2
+elseif Delta_AIC(4)<2.5
     TabellaConfrontiAIC.approximation(16) = "(disjoint_fsp)";
 end
 
@@ -2918,13 +2760,13 @@ elseif Delta_AIC(5)==0
     TabellaConfrontiAIC.x0(17) = pars_disjoint(5);
 end
 
-if Delta_AIC(1)<=2
+if Delta_AIC(1)<2.5
     TabellaConfrontiAIC.approximation(17) = "(linear)";
-elseif Delta_AIC(2)<=2
+elseif Delta_AIC(2)<2.5
     TabellaConfrontiAIC.approximation(17) = "(piecewise_fsp)";
-elseif Delta_AIC(3)<=2
+elseif Delta_AIC(3)<2.5
     TabellaConfrontiAIC.approximation(17) = "(piecewise)";
-elseif Delta_AIC(4)<=2
+elseif Delta_AIC(4)<2.5
     TabellaConfrontiAIC.approximation(17) = "(disjoint_fsp)";
 end
 
@@ -3075,13 +2917,13 @@ elseif Delta_AIC(5)==0
     TabellaConfrontiAIC.x0(18) = pars_disjoint(5);
 end
 
-if Delta_AIC(1)<=2
+if Delta_AIC(1)<2.5
     TabellaConfrontiAIC.approximation(18) = "(linear)";
-elseif Delta_AIC(2)<=2
+elseif Delta_AIC(2)<2.5
     TabellaConfrontiAIC.approximation(18) = "(piecewise_fsp)";
-elseif Delta_AIC(3)<=2
+elseif Delta_AIC(3)<2.5
     TabellaConfrontiAIC.approximation(18) = "(piecewise)";
-elseif Delta_AIC(4)<=2
+elseif Delta_AIC(4)<2.5
     TabellaConfrontiAIC.approximation(18) = "(disjoint_fsp)";
 end
 
@@ -3232,13 +3074,13 @@ elseif Delta_AIC(5)==0
     TabellaConfrontiAIC.x0(19) = pars_disjoint(5);
 end
 
-if Delta_AIC(1)<=2
+if Delta_AIC(1)<2.5
     TabellaConfrontiAIC.approximation(19) = "(linear)";
-elseif Delta_AIC(2)<=2
+elseif Delta_AIC(2)<2.5
     TabellaConfrontiAIC.approximation(19) = "(piecewise_fsp)";
-elseif Delta_AIC(3)<=2
+elseif Delta_AIC(3)<2.5
     TabellaConfrontiAIC.approximation(19) = "(piecewise)";
-elseif Delta_AIC(4)<=2
+elseif Delta_AIC(4)<2.5
     TabellaConfrontiAIC.approximation(19) = "(disjoint_fsp)";
 end
 
@@ -3389,13 +3231,13 @@ elseif Delta_AIC(5)==0
     TabellaConfrontiAIC.x0(20) = pars_disjoint(5);
 end
 
-if Delta_AIC(1)<=2
+if Delta_AIC(1)<2.5
     TabellaConfrontiAIC.approximation(20) = "(linear)";
-elseif Delta_AIC(2)<=2
+elseif Delta_AIC(2)<2.5
     TabellaConfrontiAIC.approximation(20) = "(piecewise_fsp)";
-elseif Delta_AIC(3)<=2
+elseif Delta_AIC(3)<2.5
     TabellaConfrontiAIC.approximation(20) = "(piecewise)";
-elseif Delta_AIC(4)<=2
+elseif Delta_AIC(4)<2.5
     TabellaConfrontiAIC.approximation(20) = "(disjoint_fsp)";
 end
 
@@ -3547,13 +3389,13 @@ elseif Delta_AIC(5)==0
     TabellaConfrontiAIC.x0(21) = pars_disjoint(5);
 end
 
-if Delta_AIC(1)<=2
+if Delta_AIC(1)<2.5
     TabellaConfrontiAIC.approximation(21) = "(linear)";
-elseif Delta_AIC(2)<=2
+elseif Delta_AIC(2)<2.5
     TabellaConfrontiAIC.approximation(21) = "(piecewise_fsp)";
-elseif Delta_AIC(3)<=2
+elseif Delta_AIC(3)<2.5
     TabellaConfrontiAIC.approximation(21) = "(piecewise)";
-elseif Delta_AIC(4)<=2
+elseif Delta_AIC(4)<2.5
     TabellaConfrontiAIC.approximation(21) = "(disjoint_fsp)";
 end
 
@@ -3717,13 +3559,13 @@ elseif Delta_AIC(5)==0
     TabellaConfrontiAIC.x0(22) = pars_disjoint(5);
 end
 
-if Delta_AIC(1)<=2
+if Delta_AIC(1)<2.5
     TabellaConfrontiAIC.approximation(22) = "(linear)";
-elseif Delta_AIC(2)<=2
+elseif Delta_AIC(2)<2.5
     TabellaConfrontiAIC.approximation(22) = "(piecewise_fsp)";
-elseif Delta_AIC(3)<=2
+elseif Delta_AIC(3)<2.5
     TabellaConfrontiAIC.approximation(22) = "(piecewise)";
-elseif Delta_AIC(4)<=2
+elseif Delta_AIC(4)<2.5
     TabellaConfrontiAIC.approximation(22) = "(disjoint_fsp)";
 end
 %% Google Retail and recreation vs Google Parks
@@ -3875,13 +3717,13 @@ elseif Delta_AIC(5)==0
     TabellaConfrontiAIC.x0(23) = pars_disjoint(5);
 end
 
-if Delta_AIC(1)<=2
+if Delta_AIC(1)<2.5
     TabellaConfrontiAIC.approximation(23) = "(linear)";
-elseif Delta_AIC(2)<=2
+elseif Delta_AIC(2)<2.5
     TabellaConfrontiAIC.approximation(23) = "(piecewise_fsp)";
-elseif Delta_AIC(3)<=2
+elseif Delta_AIC(3)<2.5
     TabellaConfrontiAIC.approximation(23) = "(piecewise)";
-elseif Delta_AIC(4)<=2
+elseif Delta_AIC(4)<2.5
     TabellaConfrontiAIC.approximation(23) = "(disjoint_fsp)";
 end
 %% google retail and recreation vs Google Transit Stations
@@ -4033,13 +3875,13 @@ elseif Delta_AIC(5)==0
     TabellaConfrontiAIC.x0(24) = pars_disjoint(5);
 end
 
-if Delta_AIC(1)<=2
+if Delta_AIC(1)<2.5
     TabellaConfrontiAIC.approximation(24) = "(linear)";
-elseif Delta_AIC(2)<=2
+elseif Delta_AIC(2)<2.5
     TabellaConfrontiAIC.approximation(24) = "(piecewise_fsp)";
-elseif Delta_AIC(3)<=2
+elseif Delta_AIC(3)<2.5
     TabellaConfrontiAIC.approximation(24) = "(piecewise)";
-elseif Delta_AIC(4)<=2
+elseif Delta_AIC(4)<2.5
     TabellaConfrontiAIC.approximation(24) = "(disjoint_fsp)";
 end
 %% google retail and recreation vs Google Workplaces
@@ -4191,13 +4033,13 @@ elseif Delta_AIC(5)==0
     TabellaConfrontiAIC.x0(25) = pars_disjoint(5);
 end
 
-if Delta_AIC(1)<=2
+if Delta_AIC(1)<2.5
     TabellaConfrontiAIC.approximation(25) = "(linear)";
-elseif Delta_AIC(2)<=2
+elseif Delta_AIC(2)<2.5
     TabellaConfrontiAIC.approximation(25) = "(piecewise_fsp)";
-elseif Delta_AIC(3)<=2
+elseif Delta_AIC(3)<2.5
     TabellaConfrontiAIC.approximation(25) = "(piecewise)";
-elseif Delta_AIC(4)<=2
+elseif Delta_AIC(4)<2.5
     TabellaConfrontiAIC.approximation(25) = "(disjoint_fsp)";
 end
 %% google retail and recreation vs Google Residential
@@ -4349,13 +4191,13 @@ elseif Delta_AIC(5)==0
     TabellaConfrontiAIC.x0(26) = pars_disjoint(5);
 end
 
-if Delta_AIC(1)<=2
+if Delta_AIC(1)<2.5
     TabellaConfrontiAIC.approximation(26) = "(linear)";
-elseif Delta_AIC(2)<=2
+elseif Delta_AIC(2)<2.5
     TabellaConfrontiAIC.approximation(26) = "(piecewise_fsp)";
-elseif Delta_AIC(3)<=2
+elseif Delta_AIC(3)<2.5
     TabellaConfrontiAIC.approximation(26) = "(piecewise)";
-elseif Delta_AIC(4)<=2
+elseif Delta_AIC(4)<2.5
     TabellaConfrontiAIC.approximation(26) = "(disjoint_fsp)";
 end
 %% Google Grocery and Pharmacy vs Google Parks
@@ -4507,13 +4349,13 @@ elseif Delta_AIC(5)==0
     TabellaConfrontiAIC.x0(27) = pars_disjoint(5);
 end
 
-if Delta_AIC(1)<=2
+if Delta_AIC(1)<2.5
     TabellaConfrontiAIC.approximation(27) = "(linear)";
-elseif Delta_AIC(2)<=2
+elseif Delta_AIC(2)<2.5
     TabellaConfrontiAIC.approximation(27) = "(piecewise_fsp)";
-elseif Delta_AIC(3)<=2
+elseif Delta_AIC(3)<2.5
     TabellaConfrontiAIC.approximation(27) = "(piecewise)";
-elseif Delta_AIC(4)<=2
+elseif Delta_AIC(4)<2.5
     TabellaConfrontiAIC.approximation(27) = "(disjoint_fsp)";
 end
 %% Google Grocery and Pharmacy vs Google Transit Stations
@@ -4665,13 +4507,13 @@ elseif Delta_AIC(5)==0
     TabellaConfrontiAIC.x0(28) = pars_disjoint(5);
 end
 
-if Delta_AIC(1)<=2
+if Delta_AIC(1)<2.5
     TabellaConfrontiAIC.approximation(28) = "(linear)";
-elseif Delta_AIC(2)<=2
+elseif Delta_AIC(2)<2.5
     TabellaConfrontiAIC.approximation(28) = "(piecewise_fsp)";
-elseif Delta_AIC(3)<=2
+elseif Delta_AIC(3)<2.5
     TabellaConfrontiAIC.approximation(28) = "(piecewise)";
-elseif Delta_AIC(4)<=2
+elseif Delta_AIC(4)<2.5
     TabellaConfrontiAIC.approximation(28) = "(disjoint_fsp)";
 end
 %% Google Grocery and Pharmacy vs Google Workplaces
@@ -4823,13 +4665,13 @@ elseif Delta_AIC(5)==0
     TabellaConfrontiAIC.x0(29) = pars_disjoint(5);
 end
 
-if Delta_AIC(1)<=2
+if Delta_AIC(1)<2.5
     TabellaConfrontiAIC.approximation(29) = "(linear)";
-elseif Delta_AIC(2)<=2
+elseif Delta_AIC(2)<2.5
     TabellaConfrontiAIC.approximation(29) = "(piecewise_fsp)";
-elseif Delta_AIC(3)<=2
+elseif Delta_AIC(3)<2.5
     TabellaConfrontiAIC.approximation(29) = "(piecewise)";
-elseif Delta_AIC(4)<=2
+elseif Delta_AIC(4)<2.5
     TabellaConfrontiAIC.approximation(29) = "(disjoint_fsp)";
 end
 %% Google Grocery and Pharmacy vs Google Residential
@@ -4981,13 +4823,13 @@ elseif Delta_AIC(5)==0
     TabellaConfrontiAIC.x0(30) = pars_disjoint(5);
 end
 
-if Delta_AIC(1)<=2
+if Delta_AIC(1)<2.5
     TabellaConfrontiAIC.approximation(30) = "(linear)";
-elseif Delta_AIC(2)<=2
+elseif Delta_AIC(2)<2.5
     TabellaConfrontiAIC.approximation(30) = "(piecewise_fsp)";
-elseif Delta_AIC(3)<=2
+elseif Delta_AIC(3)<2.5
     TabellaConfrontiAIC.approximation(30) = "(piecewise)";
-elseif Delta_AIC(4)<=2
+elseif Delta_AIC(4)<2.5
     TabellaConfrontiAIC.approximation(30) = "(disjoint_fsp)";
 end
 %% Google Parks vs Google Transit Stations
@@ -5139,13 +4981,13 @@ elseif Delta_AIC(5)==0
     TabellaConfrontiAIC.x0(31) = pars_disjoint(5);
 end
 
-if Delta_AIC(1)<=2
+if Delta_AIC(1)<2.5
     TabellaConfrontiAIC.approximation(31) = "(linear)";
-elseif Delta_AIC(2)<=2
+elseif Delta_AIC(2)<2.5
     TabellaConfrontiAIC.approximation(31) = "(piecewise_fsp)";
-elseif Delta_AIC(3)<=2
+elseif Delta_AIC(3)<2.5
     TabellaConfrontiAIC.approximation(31) = "(piecewise)";
-elseif Delta_AIC(4)<=2
+elseif Delta_AIC(4)<2.5
     TabellaConfrontiAIC.approximation(31) = "(disjoint_fsp)";
 end
 %% Google Parks vs Google Workplaces
@@ -5297,13 +5139,13 @@ elseif Delta_AIC(5)==0
     TabellaConfrontiAIC.x0(32) = pars_disjoint(5);
 end
 
-if Delta_AIC(1)<=2
+if Delta_AIC(1)<2.5
     TabellaConfrontiAIC.approximation(32) = "(linear)";
-elseif Delta_AIC(2)<=2
+elseif Delta_AIC(2)<2.5
     TabellaConfrontiAIC.approximation(32) = "(piecewise_fsp)";
-elseif Delta_AIC(3)<=2
+elseif Delta_AIC(3)<2.5
     TabellaConfrontiAIC.approximation(32) = "(piecewise)";
-elseif Delta_AIC(4)<=2
+elseif Delta_AIC(4)<2.5
     TabellaConfrontiAIC.approximation(32) = "(disjoint_fsp)";
 end
 %% Google Parks vs Google Residential
@@ -5455,13 +5297,13 @@ elseif Delta_AIC(5)==0
     TabellaConfrontiAIC.x0(33) = pars_disjoint(5);
 end
 
-if Delta_AIC(1)<=2
+if Delta_AIC(1)<2.5
     TabellaConfrontiAIC.approximation(33) = "(linear)";
-elseif Delta_AIC(2)<=2
+elseif Delta_AIC(2)<2.5
     TabellaConfrontiAIC.approximation(33) = "(piecewise_fsp)";
-elseif Delta_AIC(3)<=2
+elseif Delta_AIC(3)<2.5
     TabellaConfrontiAIC.approximation(33) = "(piecewise)";
-elseif Delta_AIC(4)<=2
+elseif Delta_AIC(4)<2.5
     TabellaConfrontiAIC.approximation(33) = "(disjoint_fsp)";
 end
 %% Google Transit Stations vs Google Workplaces
@@ -5613,13 +5455,13 @@ elseif Delta_AIC(5)==0
     TabellaConfrontiAIC.x0(34) = pars_disjoint(5);
 end
 
-if Delta_AIC(1)<=2
+if Delta_AIC(1)<2.5
     TabellaConfrontiAIC.approximation(34) = "(linear)";
-elseif Delta_AIC(2)<=2
+elseif Delta_AIC(2)<2.5
     TabellaConfrontiAIC.approximation(34) = "(piecewise_fsp)";
-elseif Delta_AIC(3)<=2
+elseif Delta_AIC(3)<2.5
     TabellaConfrontiAIC.approximation(34) = "(piecewise)";
-elseif Delta_AIC(4)<=2
+elseif Delta_AIC(4)<2.5
     TabellaConfrontiAIC.approximation(34) = "(disjoint_fsp)";
 end
 %% Google Transit Stations vs Google Residential
@@ -5770,13 +5612,13 @@ elseif Delta_AIC(5)==0
     TabellaConfrontiAIC.d(35) =  pars_disjoint(4);
     TabellaConfrontiAIC.x0(35) = pars_disjoint(5);
 end
-if Delta_AIC(1)<=2
+if Delta_AIC(1)<2.5
     TabellaConfrontiAIC.approximation(35) = "(linear)";
-elseif Delta_AIC(2)<=2
+elseif Delta_AIC(2)<2.5
     TabellaConfrontiAIC.approximation(35) = "(piecewise_fsp)";
-elseif Delta_AIC(3)<=2
+elseif Delta_AIC(3)<2.5
     TabellaConfrontiAIC.approximation(35) = "(piecewise)";
-elseif Delta_AIC(4)<=2
+elseif Delta_AIC(4)<2.5
     TabellaConfrontiAIC.approximation(35) = "(disjoint_fsp)";
 end
 %% Google Workplaces vs Google Residential
@@ -5928,19 +5770,18 @@ elseif Delta_AIC(5)==0
     TabellaConfrontiAIC.x0(36) = pars_disjoint(5);
 end
 
-if Delta_AIC(1)<=2
+if Delta_AIC(1)<2.5
     TabellaConfrontiAIC.approximation(36) = "(linear)";
-elseif Delta_AIC(2)<=2
+elseif Delta_AIC(2)<2.5
     TabellaConfrontiAIC.approximation(36) = "(piecewise_fsp)";
-elseif Delta_AIC(3)<=2
+elseif Delta_AIC(3)<2.5
     TabellaConfrontiAIC.approximation(36) = "(piecewise)";
-elseif Delta_AIC(4)<=2
+elseif Delta_AIC(4)<2.5
     TabellaConfrontiAIC.approximation(36) = "(disjoint_fsp)";
 end
 for i=1:height(TabellaConfrontiAIC)
-    if TabellaConfrontiAIC.approximation(i) == "("+TabellaConfrontiAIC.model(i)+")"
-        TabellaConfrontiAIC.approximation(i) = "";
-    end
+    if TabellaConfrontiAIC.approximation(i) == "("+TabellaConfrontiAIC.model(i)+")";
+        TabellaConfrontiAIC.approximation(i) = [];
 end
 %%
 function RSS=eval_linear(pars,data)
