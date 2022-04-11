@@ -1,0 +1,53 @@
+Differenze,Comparison,Regione
+1.42419201304264,retail vs residential,Umbria
+1.56538319733341,transit stations vs residential,Lazio
+1.9159864727399,retail vs residential,Veneto
+2.6210774315824,walking vs residential,Lazio
+2.93271451908209,groc_and_pharm vs transit stations,Calabria
+3.85627964928392,walking vs transit stations,Piemonte
+3.90686344074983,retail vs transit stations,Liguria
+3.98028907912452,groc_and_pharm vs workplaces,Liguria
+4.26279567790067,walking vs retail,Abruzzo
+4.54702931312481,retail vs workplaces,Friuli
+4.6803901356963,groc_and_pharm vs workplaces,Veneto
+5.14022989312193,walking vs driving,Lombardia
+5.53503053009934,walking vs groc_and_pharm,Campania
+5.76366290581308,driving vs transit stations,Lombardia
+6.1073825426141,walking vs transit stations,Marche
+6.56747677134795,driving vs transit stations,Lazio
+6.5733219840429,walking vs parks,Liguria
+6.8095622040032,groc_and_pharm vs workplaces,Trentino
+6.97736921326358,retail vs groc_and_pharm,Marche
+7.05987319810912,driving vs groc_and_pharm,Toscana
+7.06185507505447,walking vs groc_and_pharm,Toscana
+7.24819744629667,walking vs driving,Emilia
+7.28729877133765,transit stations vs workplaces,Campania
+7.29694418313791,walking vs groc_and_pharm,Piemonte
+7.31511848525304,walking vs groc_and_pharm,Liguria
+7.4490023607855,transit stations vs workplaces,Umbria
+7.57706808063602,walking vs groc_and_pharm,Abruzzo
+8.30758481476501,retail vs parks,Piemonte
+9.53186581843012,driving vs transit stations,Veneto
+9.58044780598507,parks vs transit stations,Puglia
+9.7826447232781,driving vs parks,Lombardia
+9.90314118855229,driving vs parks,Piemonte
+9.90490265646668,transit stations vs workplaces,Sardegna
+10.0696569131729,groc_and_pharm vs transit stations,Lombardia
+10.1046323866372,walking vs driving,Calabria
+10.7433374886289,walking vs workplaces,Marche
+10.9108468349657,retail vs groc_and_pharm,Toscana
+11.2363598767266,retail vs parks,Campania
+11.5138072323768,walking vs groc_and_pharm,Friuli
+11.6375058079528,retail vs workplaces,Marche
+11.8612817488161,retail vs workplaces,Abruzzo
+11.8889884593569,driving vs groc_and_pharm,Friuli
+11.9566277223459,transit stations vs workplaces,Toscana
+12.0547811378249,retail vs parks,Toscana
+12.2099850887963,groc_and_pharm vs transit stations,Veneto
+14.5934539090964,retail vs residential,Liguria
+15.4843026409987,driving vs workplaces,Puglia
+24.5367150800519,parks vs transit stations,Lazio
+28.5846990704855,driving vs workplaces,Campania
+28.5890472119668,retail vs parks,Friuli
+40.772413598284,retail vs parks,Lazio
+89.5932658300976,groc_and_pharm vs parks,Toscana
